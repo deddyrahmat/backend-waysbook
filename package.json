@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start" : "nodemon index.js"
+    "start": "nodemon index.js"
   },
   "author": "deddy",
   "license": "ISC",
@@ -15,7 +15,6 @@
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "dotenv": "^16.0.3",
-    "ejs": "~2.6.1",
     "express": "^4.16.4",
     "fastest-validator": "^1.16.0",
     "http-errors": "~1.6.3",
