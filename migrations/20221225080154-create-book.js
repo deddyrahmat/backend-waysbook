@@ -44,6 +44,9 @@ module.exports = {
       short_desc: {
         type: Sequelize.TEXT
       },
+      detail: {
+        type: Sequelize.TEXT
+      },
       bookAttachment: {
         type: Sequelize.STRING(150)
       },

@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     pages: DataTypes.STRING,
     isbn: DataTypes.STRING,
     short_desc: DataTypes.TEXT,
+    detail: DataTypes.TEXT,
     bookAttachment: DataTypes.STRING,
     cloudinary_id_bookAttachment: DataTypes.STRING,
     cloudinary_id_thumbnail: DataTypes.STRING,

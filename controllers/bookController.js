@@ -12,12 +12,13 @@ function create(req, res, next) {
         price: {type: "string", min: 1, max: 6, optional:false},
         publication: {type : "string", optional:false},
         pages: {type : "string" ,min: 1, max: 4, optional:false},
-        isbn: {type : "string" ,min: 10, max: 17, optional:false},
-        short_desc: {type : "string" ,min: 3, max: 150, optional:false},
+        isbn: {type : "string" ,min: 10, max: 17},
+        short_desc: {type : "string" , optional:false},
+        detail: {type : "string" , optional:false},
     }
 
     const data = {
-        slug : slugify(req.body.title, {replacement: '-', lower: false}),
+        slug : slugify(req.body.title, {replacement: '-', lower: true}),
         title : req.body.title,
         author : req.body.author,
         price : req.body.price,
@@ -25,6 +26,7 @@ function create(req, res, next) {
         pages : req.body.pages,
         isbn : req.body.isbn,
         short_desc : req.body.short_desc,
+        detail : req.body.short_desc,
     }
 
     const check = v.validate( data, schema);
@@ -53,6 +55,10 @@ function create(req, res, next) {
         });
     }
     
+}
+
+function getBooks(req, res, next) {
+    // Book.findAll({where : })
 }
 
 module.exports = {create}
