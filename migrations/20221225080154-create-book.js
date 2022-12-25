@@ -18,14 +18,14 @@ module.exports = {
         type: Sequelize.STRING(150)
       },
       thumbnail: {
-        type: Sequelize.STRING(100)
+        type: Sequelize.STRING(150)
       },
       cloudinary_id_thumbnail: {
-        type: Sequelize.STRING(100)
+        type: Sequelize.STRING(50)
       },
       author: {
         allowNull: false,
-        type: Sequelize.STRING(50)
+        type: Sequelize.STRING(150)
       },
       price: {
         allowNull: false,
@@ -51,7 +51,7 @@ module.exports = {
         type: Sequelize.STRING(150)
       },
       cloudinary_id_bookAttachment: {
-        type: Sequelize.STRING(150)
+        type: Sequelize.STRING(50)
       },
       createdAt: {
         allowNull: false,
