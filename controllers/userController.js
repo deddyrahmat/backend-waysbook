@@ -2,6 +2,7 @@ const {User} = require('../models');
 const Validator = require('fastest-validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { token } = require('morgan');
 
 require('dotenv').config;
 const v = new Validator();
@@ -64,4 +65,55 @@ function register(req, res, next) {
     });
 }
 
-module.exports = {register}
+function login(req, res, next) {
+    User.findOne({
+        where : {email : req.body.email},
+        attributes: { exclude: ['createdAt','updatedAt'] }
+    }).then(result => {
+        // console.log('result', result.password);
+        if (!result) {
+            res.status(400).json({
+                status : 0,
+                message : "Email or password invalid"
+            });
+        }else {
+            bcrypt.compare(req.body.password, result.password, function(err, resultPass) {
+                if (resultPass) {
+                    jwt.sign({ 
+                        fullname : result.fullname,
+                        avatar : result.avatar,
+                        email : result.email,
+                        role : result.role
+                     }, process.env.JWT_SECRET, (err, token) => {
+                        // jika funcction tanpa err, result token jadi null
+                        // console.log('err', err);
+                         res.status(200).json({
+                             status : 1,
+                             message : "Login Success",
+                             token : token,
+                             data : {
+                                 id : result.id,
+                                 fullname : result.fullname,
+                                 avatar : result.avatar,
+                                 email : result.email,
+                                 role : result.role
+                             }
+                         });
+                     });
+                }else{
+                    res.status(400).json({
+                        status : 0,
+                        message : "Email or password invalid"
+                    });
+                }
+            });
+        }
+    }).catch(err=> {
+        res.status(400).json({
+            status : 0,
+            message : "Email or password invalid"
+        });
+    });
+}
+
+module.exports = {register, login}
