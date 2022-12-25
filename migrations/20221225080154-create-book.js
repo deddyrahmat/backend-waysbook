@@ -20,6 +20,9 @@ module.exports = {
       thumbnail: {
         type: Sequelize.STRING(100)
       },
+      cloudinary_id_thumbnail: {
+        type: Sequelize.STRING(100)
+      },
       author: {
         allowNull: false,
         type: Sequelize.STRING(50)
@@ -42,6 +45,9 @@ module.exports = {
         type: Sequelize.TEXT
       },
       bookAttachment: {
+        type: Sequelize.STRING(150)
+      },
+      cloudinary_id_bookAttachment: {
         type: Sequelize.STRING(150)
       },
       createdAt: {
