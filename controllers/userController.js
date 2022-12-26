@@ -79,6 +79,11 @@ function login(req, res, next) {
         }else {
             bcrypt.compare(req.body.password, result.password, function(err, resultPass) {
                 if (resultPass) {
+
+                    // handle expired, jika 401, maka logout 
+                    // buat 2 token, refesh dan expired
+                    // httponlycookie
+
                     jwt.sign({ 
                         fullname : result.fullname,
                         avatar : result.avatar,

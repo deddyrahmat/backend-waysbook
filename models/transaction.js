@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class transaction extends Model {
+  class Transaction extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,9 +11,16 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      // relation 1 - many (1 user punya banyak transaksi)
+      Transaction.belongsTo(models.User, {
+        as : "user", foreignKey : "user_id"
+      })
+
+      // relation many-many(tabel pivot book_transaction)
+      Transaction.belongsToMany(models.Book, { through: 'Book_transaction' });
     }
   }
-  transaction.init({
+  Transaction.init({
     user_id: DataTypes.INTEGER,
     evidence: DataTypes.STRING,
     cloudinary_id_evidence: DataTypes.STRING,
@@ -21,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     status: DataTypes.STRING
   }, {
     sequelize,
-    modelName: 'transaction',
+    modelName: 'Transaction',
   });
-  return transaction;
+  return Transaction;
 };

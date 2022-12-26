@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('transactions', {
+    await queryInterface.createTable('Book_users', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -18,17 +18,14 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      evidence: {
-        type: Sequelize.STRING(150)
-      },
-      cloudinary_id_evidence: {
-        type: Sequelize.STRING(150)
-      },
-      total: {
-        type: Sequelize.INTEGER(7)
-      },
-      status: {
-        type: Sequelize.STRING(8)
+      book_id: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: "Books",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
       createdAt: {
         allowNull: false,
@@ -41,6 +38,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('transactions');
+    await queryInterface.dropTable('Book_users');
   }
 };

@@ -11,6 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      // relation 1 - many (1 user punya banyak transaksi)
+      User.hasMany(models.Transaction)
+
+      // relation many-many(menghasilkan tabel pivot book_user)
+      User.belongsToMany(models.Book, { through: 'Book_user' });
     }
   }
   User.init({

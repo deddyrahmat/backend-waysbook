@@ -2,33 +2,24 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('transactions', {
+    await queryInterface.createTable('Sold_outs', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      user_id: {
+      book_id: {
         type: Sequelize.INTEGER,
         references: {
-          model: "Users",
+          model: "Books",
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      evidence: {
-        type: Sequelize.STRING(150)
-      },
-      cloudinary_id_evidence: {
-        type: Sequelize.STRING(150)
-      },
       total: {
-        type: Sequelize.INTEGER(7)
-      },
-      status: {
-        type: Sequelize.STRING(8)
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
@@ -41,6 +32,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('transactions');
+    await queryInterface.dropTable('Sold_outs');
   }
 };
