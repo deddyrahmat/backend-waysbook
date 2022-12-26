@@ -4,7 +4,7 @@ const slugify = require('slugify')
 
 const v = new Validator();
 
-function create(req, res, next) {
+function create(req, res) {
     console.log('req.files', req.files)
     const schema = {
         title: {type : "string" ,min: 3, max: 150, optional:false},
@@ -57,7 +57,7 @@ function create(req, res, next) {
     
 }
 
-function getBooks(req, res, next) {
+function getBooks(req, res) {
     Book.findAll({
         limit : 5,
         order : [
@@ -80,4 +80,24 @@ function getBooks(req, res, next) {
     });
 }
 
-module.exports = {create, getBooks}
+function getBookById(req, res) {
+    Book.findOne({
+        where : {slug : req.params.slug},
+        attributes: { 
+            exclude: ['cloudinary_id_bookAttachment','cloudinary_id_thumbnail','createdAt','updatedAt'] 
+        }
+    }).then(result => {
+        res.status(200).json({
+            status : 1,
+            message : "Data Books Avaiable",
+            data : result
+        })
+    }).catch(err => {
+        res.status(500).json({
+            status : 0,
+            message : err,
+        })
+    });
+}
+
+module.exports = {create, getBooks, getBookById}
