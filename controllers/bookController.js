@@ -5,14 +5,14 @@ const slugify = require('slugify')
 const v = new Validator();
 
 function create(req, res) {
-    console.log('req.files', req.files)
+    // console.log('req.files', req.files)
     const schema = {
         title: {type : "string" ,min: 3, max: 150, optional:false},
         author: {type : "string", optional:false},
         price: {type: "string", min: 1, max: 6, optional:false},
         publication: {type : "string", optional:false},
         pages: {type : "string" ,min: 1, max: 4, optional:false},
-        isbn: {type : "string" ,min: 10, max: 17},
+        isbn: {type : "string"},
         short_desc: {type : "string" , optional:false},
         detail: {type : "string" , optional:false},
     }
