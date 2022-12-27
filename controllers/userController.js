@@ -3,6 +3,7 @@ const Validator = require('fastest-validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { token } = require('morgan');
+const { signAccessToken, signRefreshToken } = require('../utilities/jwt');
 
 require('dotenv').config;
 const v = new Validator();
@@ -77,28 +78,12 @@ function login(req, res, next) {
                 message : "Email or password invalid"
             });
         }else {
-            bcrypt.compare(req.body.password, result.password, function(err, resultPass) {
+            bcrypt.compare(req.body.password, result.password, async function(err, resultPass) {
                 if (resultPass) {
 
-                    const option = {
-                        expiresIn: '50s'
-                    }
+                    const signLogin = await signAccessToken(result.dataValues);
 
-                    const signLogin = jwt.sign({ 
-                        id : result.id,
-                        fullname : result.fullname,
-                        avatar : result.avatar,
-                        email : result.email,
-                        role : result.role
-                     }, process.env.JWT_SECRET, option);
-
-                    const signRefresh = jwt.sign({ 
-                        id : result.id,
-                        fullname : result.fullname,
-                        avatar : result.avatar,
-                        email : result.email,
-                        role : result.role
-                     }, process.env.REFRESH_JWT_SECRET, {expiresIn: '1h'});
+                    const signRefresh = await signRefreshToken(result.dataValues);
 
                      // jika funcction tanpa err, result token jadi null
                         // console.log('err', err);
@@ -106,6 +91,13 @@ function login(req, res, next) {
                             res.status(403).json({
                                 status : 0,
                                 message : signLogin
+                            })
+                        }
+
+                        if (!signRefresh) {
+                            res.status(403).json({
+                                status : 0,
+                                message : signRefresh
                             })
                         }
 
@@ -138,7 +130,7 @@ function login(req, res, next) {
     });
 }
 
-function refreshTokenJwt(req, res, next) {
+async function refreshTokenJwt(req, res, next) {
     const authHeader = req.headers;
     if (authHeader) {
         // console.log('authHeader', authHeader)
@@ -152,25 +144,21 @@ function refreshTokenJwt(req, res, next) {
             })
         }
 
-        const option = {
-            expiresIn: '50s'
-        }
-        
-        const signLogin = jwt.sign({ 
+        const signLogin = await signAccessToken({ 
             id : resultRefresh.id,
             fullname : resultRefresh.fullname,
             avatar : resultRefresh.avatar,
             email : resultRefresh.email,
             role : resultRefresh.role
-         }, process.env.JWT_SECRET, option);
+         });
 
-        const signRefresh = jwt.sign({ 
+        const signRefresh = await signRefreshToken({ 
             id : resultRefresh.id,
             fullname : resultRefresh.fullname,
             avatar : resultRefresh.avatar,
             email : resultRefresh.email,
             role : resultRefresh.role
-         }, process.env.REFRESH_JWT_SECRET, {expiresIn: '1h'});
+         });
 
          // jika funcction tanpa err, result token jadi null
             // console.log('err', err);
@@ -178,6 +166,13 @@ function refreshTokenJwt(req, res, next) {
                 res.status(401).json({
                     status : 0,
                     message : signLogin
+                })
+            }
+
+            if (!signRefresh) {
+                res.status(401).json({
+                    status : 0,
+                    message : signRefresh
                 })
             }
 
