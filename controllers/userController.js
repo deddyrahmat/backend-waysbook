@@ -14,7 +14,7 @@ function register(req, res, next) {
                 // console.log('resultUser', resultUser)
 
                 if (resultUser) {
-                    return res.status(401).json({
+                    return res.status(403).json({
                         status : 0,
                         message : "Email already exist"
                     });
@@ -36,7 +36,7 @@ function register(req, res, next) {
                 const check = v.validate(data, schema);
                 // console.log('check', check)
                 if (check !== true) { 
-                    res.status(400).json({
+                    res.status(403).json({
                         status : 0,
                         message : check
                     })
@@ -72,7 +72,7 @@ function login(req, res, next) {
     }).then(result => {
         // console.log('result', result.password);
         if (!result) {
-            res.status(400).json({
+            res.status(403).json({
                 status : 0,
                 message : "Email or password invalid"
             });
@@ -80,22 +80,40 @@ function login(req, res, next) {
             bcrypt.compare(req.body.password, result.password, function(err, resultPass) {
                 if (resultPass) {
 
-                    // handle expired, jika 401, maka logout 
-                    // buat 2 token, refesh dan expired
-                    // httponlycookie
+                    const option = {
+                        expiresIn: '50s'
+                    }
 
-                    jwt.sign({ 
+                    const signLogin = jwt.sign({ 
+                        id : result.id,
                         fullname : result.fullname,
                         avatar : result.avatar,
                         email : result.email,
                         role : result.role
-                     }, process.env.JWT_SECRET, (err, token) => {
-                        // jika funcction tanpa err, result token jadi null
+                     }, process.env.JWT_SECRET, option);
+
+                    const signRefresh = jwt.sign({ 
+                        id : result.id,
+                        fullname : result.fullname,
+                        avatar : result.avatar,
+                        email : result.email,
+                        role : result.role
+                     }, process.env.REFRESH_JWT_SECRET, {expiresIn: '1h'});
+
+                     // jika funcction tanpa err, result token jadi null
                         // console.log('err', err);
+                        if (!signLogin) {
+                            res.status(403).json({
+                                status : 0,
+                                message : signLogin
+                            })
+                        }
+
                          res.status(200).json({
                              status : 1,
                              message : "Login Success",
-                             token : token,
+                             token : signLogin,
+                             refresh_token : signRefresh,
                              data : {
                                  id : result.id,
                                  fullname : result.fullname,
@@ -104,9 +122,8 @@ function login(req, res, next) {
                                  role : result.role
                              }
                          });
-                     });
                 }else{
-                    res.status(400).json({
+                    res.status(403).json({
                         status : 0,
                         message : "Email or password invalid"
                     });
@@ -114,11 +131,71 @@ function login(req, res, next) {
             });
         }
     }).catch(err=> {
-        res.status(400).json({
+        res.status(403).json({
             status : 0,
             message : "Email or password invalid"
         });
     });
 }
 
-module.exports = {register, login}
+function refreshTokenJwt(req, res, next) {
+    const authHeader = req.headers;
+    if (authHeader) {
+        // console.log('authHeader', authHeader)
+        // jika ada headers authorization yang dikirimkan
+        const token = authHeader.authorization.split(' ')[1];
+        const resultRefresh = jwt.verify(token, process.env.REFRESH_JWT_SECRET);
+        if (!resultRefresh) {
+            return res.status(401).json({
+                status : 0,
+                message : resultRefresh
+            })
+        }
+
+        const option = {
+            expiresIn: '50s'
+        }
+        
+        const signLogin = jwt.sign({ 
+            id : resultRefresh.id,
+            fullname : resultRefresh.fullname,
+            avatar : resultRefresh.avatar,
+            email : resultRefresh.email,
+            role : resultRefresh.role
+         }, process.env.JWT_SECRET, option);
+
+        const signRefresh = jwt.sign({ 
+            id : resultRefresh.id,
+            fullname : resultRefresh.fullname,
+            avatar : resultRefresh.avatar,
+            email : resultRefresh.email,
+            role : resultRefresh.role
+         }, process.env.REFRESH_JWT_SECRET, {expiresIn: '1h'});
+
+         // jika funcction tanpa err, result token jadi null
+            // console.log('err', err);
+            if (!signLogin) {
+                res.status(401).json({
+                    status : 0,
+                    message : signLogin
+                })
+            }
+
+             res.status(200).json({
+                 status : 1,
+                 message : "Login Success",
+                 token : signLogin,
+                 refresh_token : signRefresh,
+                 data : {
+                     id : resultRefresh.id,
+                     fullname : resultRefresh.fullname,
+                     avatar : resultRefresh.avatar,
+                     email : resultRefresh.email,
+                     role : resultRefresh.role
+                 }
+             });
+    }
+
+}
+
+module.exports = {register, login, refreshTokenJwt}

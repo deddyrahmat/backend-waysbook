@@ -95,6 +95,7 @@ function getBooks(req, res) {
 }
 
 function getBookById(req, res) {
+    // console.log("data", req.user)
     Book.findOne({
         where : {slug : req.params.slug},
         attributes: { 
