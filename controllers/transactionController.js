@@ -1,6 +1,6 @@
-const {Transaction, Booktransaction} = require('../models');
+const {Transaction, Booktransaction, Bookuser} = require('../models');
 const Validator = require('fastest-validator');
-const { schemaTransactionPayment } = require('../utilities/validation_schema');
+const { schemaTransactionPayment, schemaStatusPayment } = require('../utilities/validation_schema');
 
 const v = new Validator();
 
@@ -57,4 +57,58 @@ function create(req, res) {
     
 }
 
-module.exports = {create}
+function changeStatus(req, res) {
+
+    const { books } = req.body;
+
+    const data = {
+        status : req.body.status
+    }
+
+    const check = v.validate(data, schemaStatusPayment);
+    if (!check) {
+        return res.status(403).json({
+            status : 0,
+            message : check
+        })
+    }
+
+    Transaction.update({
+        status : req.body.status
+    },{where : {
+        id : req.body.transaction_id
+    }}).then((result) => {
+        if (req.body.status !== 'approve') {
+            return res.status(200).json({
+                status : 1,
+                message : "Status Updated"
+            })
+        }
+        
+        const dataBooks = books.map(book =>  {
+            return {
+                book_id : parseInt(book),
+                user_id : parseInt(req.body.user_id),
+            }
+        });
+        Bookuser.bulkCreate(dataBooks).then(() => {
+            return res.status(200).json({
+                status : 1,
+                message : "Status Updated"
+            })
+        }).catch((err) => {
+            return res.status(500).json({
+                status : 0,
+                message : err
+            })
+        });
+    }).catch((err) => {
+        return res.status(500).json({
+            status : 0,
+            message : err
+        })
+    });
+
+}
+
+module.exports = {create, changeStatus}

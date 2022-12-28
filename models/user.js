@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.Transaction)
 
       // relation many-many(menghasilkan tabel pivot book_user)
-      User.belongsToMany(models.Book, { through: 'Bookuser' });
+      User.belongsToMany(models.Book, { through: 'Bookuser',foreignKey: "user_id" });
     }
   }
   User.init({

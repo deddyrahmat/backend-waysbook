@@ -23,4 +23,9 @@ const schemaTransactionPayment = {
     total: {type: "number", positive: true, integer: true, optional:false},
 }
 
-module.exports = {schemaRegister,schemaCreateBook, schemaTransactionPayment}
+// status payment
+const schemaStatusPayment = {
+    status : {type : "string",min: 1, max: 8, optional : false}
+}
+
+module.exports = {schemaRegister,schemaCreateBook, schemaTransactionPayment, schemaStatusPayment}
