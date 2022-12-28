@@ -7,6 +7,7 @@ const cors = require('cors');
 
 const userRouter = require('./routes/user');
 const bookRouter = require('./routes/book');
+const transactionRouter = require('./routes/transaction');
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/book', bookRouter);
+app.use('/api/v1/transaction', transactionRouter);
 
 
 // // catch 404 and forward to error handler

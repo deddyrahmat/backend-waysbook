@@ -47,17 +47,17 @@ module.exports = {
       detail: {
         type: Sequelize.TEXT
       },
-      bookAttachment: {
+      book_attachment: {
         type: Sequelize.STRING(150)
       },
-      cloudinary_id_bookAttachment: {
+      cloudinary_id_book_attachment: {
         type: Sequelize.STRING(50)
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }

@@ -1,22 +1,12 @@
 const {Book} = require('../models');
 const Validator = require('fastest-validator');
-const slugify = require('slugify')
+const slugify = require('slugify');
+const { schemaCreateBook } = require('../utilities/validation_schema');
 
 const v = new Validator();
 
 function create(req, res) {
     // console.log('req.files', req.files)
-    const schema = {
-        title: {type : "string" ,min: 3, max: 150, optional:false},
-        author: {type : "string", optional:false},
-        price: {type: "string", min: 1, max: 6, optional:false},
-        publication: {type : "string", optional:false},
-        pages: {type : "string" ,min: 1, max: 4, optional:false},
-        isbn: {type : "string"},
-        short_desc: {type : "string" , optional:false},
-        detail: {type : "string" , optional:false},
-    }
-
     const data = {
         slug : slugify(req.body.title, {replacement: '-', lower: true}),
         title : req.body.title,
@@ -29,17 +19,17 @@ function create(req, res) {
         detail : req.body.short_desc,
     }
 
-    const check = v.validate( data, schema);
+    const check = v.validate( data, schemaCreateBook);
     if (check !== true) {
-        res.status(400).json({
+        res.status(403).json({
             status : 0,
             message : check
         })
     }else {
         Book.create({
             ...data,
-            bookAttachment : req.files.bookAttachment[0].path,
-            cloudinary_id_bookAttachment : req.files.bookAttachment[0].filename,
+            book_attachment : req.files.bookAttachment[0].path,
+            cloudinary_id_book_attachment : req.files.bookAttachment[0].filename,
             cloudinary_id_thumbnail : req.files.thumbnail[0].filename,
             thumbnail : req.files.thumbnail[0].path,
         }).then(() => {

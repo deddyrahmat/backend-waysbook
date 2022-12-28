@@ -1,50 +1,52 @@
-const {Book} = require('../models');
+const {Transaction, Booktransaction} = require('../models');
 const Validator = require('fastest-validator');
+const { schemaTransactionPayment } = require('../utilities/validation_schema');
 
 const v = new Validator();
 
 function create(req, res) {
-    const schema = {
-        title: {type : "string" ,min: 3, max: 150, optional:false},
-        author: {type : "string", optional:false},
-        price: {type: "string", min: 1, max: 6, optional:false},
-        publication: {type : "string", optional:false},
-        pages: {type : "string" ,min: 1, max: 4, optional:false},
-        isbn: {type : "string" ,min: 10, max: 17},
-        short_desc: {type : "string" , optional:false},
-        detail: {type : "string" , optional:false},
-    }
+    // console.log('req.files', req.body)
+    const { books } = req.body;
+    // const newBooks = JSON.parse(books);
 
     const data = {
-        slug : slugify(req.body.title, {replacement: '-', lower: true}),
-        title : req.body.title,
-        author : req.body.author,
-        price : req.body.price,
-        publication : req.body.publication,
-        pages : req.body.pages,
-        isbn : req.body.isbn,
-        short_desc : req.body.short_desc,
-        detail : req.body.short_desc,
+        total : parseInt(req.body.total),
     }
 
-    const check = v.validate( data, schema);
+    const check = v.validate( data, schemaTransactionPayment);
     if (check !== true) {
-        res.status(400).json({
+        res.status(403).json({
             status : 0,
             message : check
         })
     }else {
-        Book.create({
+        Transaction.create({
             ...data,
-            bookAttachment : req.files.bookAttachment[0].path,
-            cloudinary_id_bookAttachment : req.files.bookAttachment[0].filename,
-            cloudinary_id_thumbnail : req.files.thumbnail[0].filename,
-            thumbnail : req.files.thumbnail[0].path,
-        }).then(() => {
-            res.status(200).json({
-                status : 1,
-                message : "Success Created Book"
-            })
+            user_id : req.user.id,
+            status : 'pending',
+            cloudinary_id_evidence : req.files.evidence[0].filename,
+            evidence : req.files.evidence[0].path,
+        }).then((result) => {
+            const dataBooks = books.map(book =>  {
+                return {
+                    book_id : parseInt(book),
+                    transaction_id : parseInt(result.dataValues.id),
+                }
+            });
+            if (dataBooks.length > 0) {
+                // console.log('dataBooks', dataBooks)
+                Booktransaction.bulkCreate(dataBooks).then(() => {
+                    return res.status(200).json({
+                        status : 1,
+                        message : "Payment Success"
+                    })
+                }).catch((err) => {
+                    return res.status(500).json({
+                        status : 0,
+                        message : err
+                    })
+                });
+            }
         }).catch((err) => {
             res.status(500).json({
                 status : 0,

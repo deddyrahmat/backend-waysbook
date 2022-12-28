@@ -1,0 +1,3 @@
+401 = untuk token expired
+403 = untuk untuk response error after condition
+500 = untuk server error/catch

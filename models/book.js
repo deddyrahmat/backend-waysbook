@@ -15,10 +15,10 @@ module.exports = (sequelize, DataTypes) => {
       Book.hasOne(models.Sold_out);
 
       // relation many-many
-      Book.belongsToMany(models.Transaction, { through: 'Book_transaction' });
+      Book.belongsToMany(models.Transaction, { through: 'Booktransaction',foreignKey: "book_id", });
 
       // relation many-many
-      Book.belongsToMany(models.User, { through: 'Book_user' });
+      Book.belongsToMany(models.User, { through: 'Bookuser' });
     }
   }
   Book.init({
@@ -32,12 +32,13 @@ module.exports = (sequelize, DataTypes) => {
     isbn: DataTypes.STRING,
     short_desc: DataTypes.TEXT,
     detail: DataTypes.TEXT,
-    bookAttachment: DataTypes.STRING,
-    cloudinary_id_bookAttachment: DataTypes.STRING,
+    book_attachment: DataTypes.STRING,
+    cloudinary_id_book_attachment: DataTypes.STRING,
     cloudinary_id_thumbnail: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'Book',
+    underscored: true
   });
   return Book;
 };

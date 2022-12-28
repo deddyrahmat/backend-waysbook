@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { token } = require('morgan');
 const { signAccessToken, signRefreshToken } = require('../utilities/jwt');
+const { schemaRegister } = require('../utilities/validation_schema');
 
 require('dotenv').config;
 const v = new Validator();
@@ -28,13 +29,7 @@ function register(req, res, next) {
                     role : "user"
                 }
     
-                const schema = {
-                    fullname: { type: "string",min: 3, max: 100, optional:false },
-                    email: { type: "email",min: 3, max: 100, optional:false },
-                    password: { type: "string",min: 20, max: 255, optional:false },
-                };
-
-                const check = v.validate(data, schema);
+                const check = v.validate(data, schemaRegister);
                 // console.log('check', check)
                 if (check !== true) { 
                     res.status(403).json({

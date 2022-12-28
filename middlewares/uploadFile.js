@@ -56,7 +56,7 @@ exports.uploadFile = (imageFile, bookAttachment) => {
                     allowedFormats: "pdf",
                     format: "pdf"
                 };                
-            }else if (file.fieldname === "thumbnail" || file.fieldname === "attachment" || file.fieldname === "avatar"){
+            }else if (file.fieldname === "thumbnail" || file.fieldname === "attachment" || file.fieldname === "evidence" || file.fieldname === "avatar"){
                 // simpan file hasil upload ke folder waysbooks dari clodynary
                 // dan hanya mengizikan jenis file type image dan sisanya otomatis di create cloudinary
                 return {

@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Book_transaction extends Model {
+  class Soldout extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,16 +11,18 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      // model pivot
-      
+      Soldout.belongsTo(models.Book, {
+        as : "book", foreignKey : "book_id"
+      })
     }
   }
-  Book_transaction.init({
+  Soldout.init({
     book_id: DataTypes.INTEGER,
-    transaction_id: DataTypes.INTEGER
+    total: DataTypes.INTEGER
   }, {
     sequelize,
-    modelName: 'Book_transaction',
+    modelName: 'Soldout',
+    underscored: true
   });
-  return Book_transaction;
+  return Soldout;
 };

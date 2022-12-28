@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       })
 
       // relation many-many(tabel pivot book_transaction)
-      Transaction.belongsToMany(models.Book, { through: 'Book_transaction' });
+      Transaction.belongsToMany(models.Book, { through: 'Booktransaction',foreignKey: "transaction_id", });
     }
   }
   Transaction.init({
@@ -29,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'Transaction',
+    underscored: true
   });
   return Transaction;
 };
