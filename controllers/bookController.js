@@ -1,7 +1,8 @@
-const {Book} = require('../models');
+const {Book, Soldout} = require('../models');
 const Validator = require('fastest-validator');
 const slugify = require('slugify');
 const { schemaCreateBook } = require('../utilities/validation_schema');
+const { Sequelize } = require('sequelize');
 
 const v = new Validator();
 
@@ -105,4 +106,33 @@ function getBookById(req, res) {
     });
 }
 
-module.exports = {create, getBooks, getBookById}
+function bestSeller(req, res) {
+    Soldout.findAll({
+        order: [
+            // Will order by max(age)
+            ['total', 'DESC']
+            // Sequelize.fn('max', Sequelize.col('total')),
+        ],
+        limit : 5,
+    }).then((result) => {
+        if (result.length === 0) {
+            return res.status(200).json({
+                status : 1,
+                message : "Data Empty",
+                data : null
+            })
+        }
+        return res.status(200).json({
+            status : 1,
+            message : "Load Data Success",
+            data : result
+        })
+    }).catch(err => {
+        return res.status(500).json({
+            status : 0,
+            message : err
+        })
+    })
+}
+
+module.exports = {create, getBooks, getBookById, bestSeller}
