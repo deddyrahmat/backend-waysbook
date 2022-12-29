@@ -1,4 +1,4 @@
-const {Transaction, Booktransaction, Bookuser} = require('../models');
+const {Transaction, Booktransaction, Bookuser, Soldout} = require('../models');
 const Validator = require('fastest-validator');
 const { schemaTransactionPayment, schemaStatusPayment } = require('../utilities/validation_schema');
 
@@ -57,27 +57,35 @@ function create(req, res) {
     
 }
 
-function changeStatus(req, res) {
+async function changeStatus(req, res) {
+    try {
+        const { books } = req.body;
 
-    const { books } = req.body;
+        const data = {
+            status : req.body.status
+        }
 
-    const data = {
-        status : req.body.status
-    }
+        const check = v.validate(data, schemaStatusPayment);
+        if (!check) {
+            return res.status(403).json({
+                status : 0,
+                message : check
+            })
+        }
 
-    const check = v.validate(data, schemaStatusPayment);
-    if (!check) {
-        return res.status(403).json({
-            status : 0,
-            message : check
-        })
-    }
+        const resTransaction = await Transaction.update({
+            status : req.body.status
+        },{where : {
+            id : req.body.transaction_id
+        }})
 
-    Transaction.update({
-        status : req.body.status
-    },{where : {
-        id : req.body.transaction_id
-    }}).then((result) => {
+        if (!resTransaction) {
+            return res.status(401).json({
+                status : 0,
+                message : resTransaction
+            })
+        }
+
         if (req.body.status !== 'approve') {
             return res.status(200).json({
                 status : 1,
@@ -91,23 +99,41 @@ function changeStatus(req, res) {
                 user_id : parseInt(req.body.user_id),
             }
         });
-        Bookuser.bulkCreate(dataBooks).then(() => {
-            return res.status(200).json({
-                status : 1,
-                message : "Status Updated"
-            })
-        }).catch((err) => {
-            return res.status(500).json({
+        const resBookUser = await Bookuser.bulkCreate(dataBooks);
+        if (!resBookUser) {
+            return res.status(401).json({
                 status : 0,
-                message : err
+                message : resTransaction
             })
+        }
+
+        books.forEach(async (book) => {
+            const resFindBook = await Soldout.findOne({where : {book_id : book}});
+            console.log('resFindBook', resFindBook ? true : false);
+            // cek buku sudah ada atau belum
+            // kalo belum add data buku,kalo ada update total
+            if (!resFindBook) {
+                await Soldout.create({book_id : book, total : 1});
+            }else{
+                await Soldout.update({total : resFindBook.dataValues.total + 1},{where : {
+                    id : resFindBook.dataValues.id
+                }});
+            }
+
         });
-    }).catch((err) => {
+        return res.status(200).json({
+            status : 1,
+            message : "Update successfully"
+        })
+        
+    } catch (err) {
         return res.status(500).json({
             status : 0,
             message : err
         })
-    });
+        
+    }
+
 
 }
 
