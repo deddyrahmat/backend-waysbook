@@ -188,4 +188,19 @@ async function refreshTokenJwt(req, res, next) {
 
 }
 
-module.exports = {register, login, refreshTokenJwt}
+function update(req, res) {
+    const {body} = req;
+    User.update(body, {where : {id : req.user.id}}).then(() => {
+        return res.status(200).json({
+            status : 1,
+            message : "Successfully Update Profile"
+        })
+    }).catch(err => {
+        return res.status(500).json({
+            status : 0,
+            message : err
+        })
+    })
+}
+
+module.exports = {register, login, refreshTokenJwt, update}
