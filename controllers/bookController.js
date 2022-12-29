@@ -2,7 +2,6 @@ const {Book, Soldout} = require('../models');
 const Validator = require('fastest-validator');
 const slugify = require('slugify');
 const { schemaCreateBook } = require('../utilities/validation_schema');
-const { Sequelize } = require('sequelize');
 
 const v = new Validator();
 
@@ -108,10 +107,20 @@ function getBookById(req, res) {
 
 function bestSeller(req, res) {
     Soldout.findAll({
+        attributes:{
+            exclude : ["createdAt","updatedAt", "BookId"]
+        },
+        include : [
+            {
+                model : Book,
+                as : "book",
+                attributes:{
+                    exclude:["createdAt","updatedAt","cloudinary_id_book_attachment","cloudinary_id_thumbnail"]
+                }
+            }
+        ],
         order: [
-            // Will order by max(age)
             ['total', 'DESC']
-            // Sequelize.fn('max', Sequelize.col('total')),
         ],
         limit : 5,
     }).then((result) => {
