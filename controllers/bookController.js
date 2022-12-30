@@ -1,4 +1,4 @@
-const {Book, Soldout} = require('../models');
+const {Book, Bestseller} = require('../models');
 const Validator = require('fastest-validator');
 const slugify = require('slugify');
 const { schemaCreateBook } = require('../utilities/validation_schema');
@@ -106,7 +106,7 @@ function getBookById(req, res) {
 }
 
 function bestSeller(req, res) {
-    Soldout.findAll({
+    Bestseller.findAll({
         attributes:{
             exclude : ["createdAt","updatedAt", "BookId"]
         },

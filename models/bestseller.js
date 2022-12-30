@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Soldout extends Model {
+  class Bestseller extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,18 +11,18 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Soldout.belongsTo(models.Book, {
+      Bestseller.belongsTo(models.Book, {
         as : "book", foreignKey : "book_id"
       })
     }
   }
-  Soldout.init({
+  Bestseller.init({
     book_id: DataTypes.INTEGER,
     total: DataTypes.INTEGER
   }, {
     sequelize,
-    modelName: 'Soldout',
+    modelName: 'Bestseller',
     underscored: true
   });
-  return Soldout;
+  return Bestseller;
 };

@@ -1,4 +1,4 @@
-const {Transaction, Booktransaction, Bookuser, Soldout} = require('../models');
+const {Transaction, Booktransaction, Bookuser, Bestseller} = require('../models');
 const Validator = require('fastest-validator');
 const { schemaTransactionPayment, schemaStatusPayment } = require('../utilities/validation_schema');
 
@@ -108,14 +108,14 @@ async function changeStatus(req, res) {
         }
 
         books.forEach(async (book) => {
-            const resFindBook = await Soldout.findOne({where : {book_id : book}});
+            const resFindBook = await Bestseller.findOne({where : {book_id : book}});
             console.log('resFindBook', resFindBook ? true : false);
             // cek buku sudah ada atau belum
             // kalo belum add data buku,kalo ada update total
             if (!resFindBook) {
-                await Soldout.create({book_id : book, total : 1});
+                await Bestseller.create({book_id : book, total : 1});
             }else{
-                await Soldout.update({total : resFindBook.dataValues.total + 1},{where : {
+                await Bestseller.update({total : resFindBook.dataValues.total + 1},{where : {
                     id : resFindBook.dataValues.id
                 }});
             }
