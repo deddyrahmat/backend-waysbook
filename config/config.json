@@ -16,10 +16,10 @@
     "dialect": "mysql"
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
+    "username": "u1604124_deddywaysbooks",
+    "password": "h%7-],#kN.@~",
+    "database": "u1604124_deddy_waysbooks",
+    "host": "srv135.niagahoster.com",
     "dialect": "mysql"
   }
 }
