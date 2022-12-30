@@ -26,7 +26,7 @@ function auth(req, res, next) {
             next();
           });
     }else {
-        return res.status(403).json({
+        return res.status(200).json({
             status : 0,
             message : "Expired Token"
         })
@@ -37,7 +37,7 @@ function isAdmin(req, res, next) {
     // menangkap data req user dari auth sebelumnya
     // console.log('req.user', req.user)
     if(!req.user){
-        return res.status(400).json({
+        return res.status(200).json({
             status : 0,
             error : {
                 message : "No Token. Authorization Denied"
@@ -48,7 +48,7 @@ function isAdmin(req, res, next) {
     User.findOne({where : {id : req.user.id}}).then(
         (result) => {
             if (result.role !== req.user.role) {
-                return res.status(400).json({
+                return res.status(200).json({
                     status : 0,
                     message : "User Not Found ! Admin Authorization Denied"
                 })
@@ -57,7 +57,7 @@ function isAdmin(req, res, next) {
             next()
         }
     ).catch(() => {
-        return res.status(400).json({
+        return res.status(500).json({
             status : 0,
             error : {
                 message : "User Not Found ! Admin Authorization Denied"

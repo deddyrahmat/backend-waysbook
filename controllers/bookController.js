@@ -21,9 +21,9 @@ function create(req, res) {
 
     const check = v.validate( data, schemaCreateBook);
     if (check !== true) {
-        res.status(403).json({
+        res.status(200).json({
             status : 0,
-            message : check
+            message : check[0].message
         })
     }else {
         Book.create({
@@ -68,6 +68,16 @@ function getBooks(req, res) {
         offset: dataOffset,
         limit: perPage
     }).then((result) => {
+        if (result.rows.length === 0 ) {
+            res.status(200).json({
+                status : 1,
+                message : "Data Books Not Found",
+                data : result.rows,
+                total_data : result.count,
+                per_page : perPage,
+                current_page : currentPage
+            })
+        }
         res.status(200).json({
             status : 1,
             message : "Data Books Avaiable",
@@ -92,6 +102,15 @@ function getBookById(req, res) {
             exclude: ['cloudinary_id_bookAttachment','cloudinary_id_thumbnail','createdAt','updatedAt'] 
         }
     }).then(result => {
+
+        if (!result) {
+            res.status(200).json({
+                status : 1,
+                message : "Data Books Not Found",
+                data : result
+            })
+        }
+        
         res.status(200).json({
             status : 1,
             message : "Data Books Avaiable",

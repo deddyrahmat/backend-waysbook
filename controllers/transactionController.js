@@ -15,9 +15,9 @@ function create(req, res) {
 
     const check = v.validate( data, schemaTransactionPayment);
     if (check !== true) {
-        res.status(403).json({
+        res.status(200).json({
             status : 0,
-            message : check
+            message : check[0].message
         })
     }else {
         Transaction.create({
@@ -67,14 +67,14 @@ async function changeStatus(req, res) {
 
         const check = v.validate(data, schemaStatusPayment);
         if (!check) {
-            return res.status(403).json({
+            return res.status(200).json({
                 status : 0,
-                message : check
+                message : check[0].message
             })
         }
 
-        console.log('status', req.body.status)
-        console.log('transacti', req.body.transaction_id)
+        // console.log('status', req.body.status)
+        // console.log('transacti', req.body.transaction_id)
 
         const resTransaction = await Transaction.update({
             status : req.body.status

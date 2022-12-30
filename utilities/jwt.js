@@ -25,7 +25,7 @@ function signAccessToken(data) {
 function signRefreshToken(data) {
     return new Promise((resolve, reject) => {
         const option = {
-            expiresIn: '90s'
+            expiresIn: '24h'
         }
     
         jwt.sign(data, process.env.REFRESH_JWT_SECRET, option, (err, token) => {

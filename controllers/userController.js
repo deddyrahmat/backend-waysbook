@@ -32,9 +32,9 @@ function register(req, res, next) {
                 const check = v.validate(data, schemaRegister);
                 // console.log('check', check)
                 if (check !== true) { 
-                    res.status(403).json({
+                    res.status(200).json({
                         status : 0,
-                        message : check
+                        message : check[0].message
                     })
                 }
                 else {
@@ -68,7 +68,7 @@ function login(req, res, next) {
     }).then(result => {
         // console.log('result', result.password);
         if (!result) {
-            res.status(403).json({
+            res.status(200).json({
                 status : 0,
                 message : "Email or password invalid"
             });
@@ -83,14 +83,14 @@ function login(req, res, next) {
                      // jika funcction tanpa err, result token jadi null
                         // console.log('err', err);
                         if (!signLogin) {
-                            res.status(403).json({
+                            res.status(200).json({
                                 status : 0,
                                 message : signLogin
                             })
                         }
 
                         if (!signRefresh) {
-                            res.status(403).json({
+                            res.status(200).json({
                                 status : 0,
                                 message : signRefresh
                             })
@@ -110,7 +110,7 @@ function login(req, res, next) {
                              }
                          });
                 }else{
-                    res.status(403).json({
+                    res.status(200).json({
                         status : 0,
                         message : "Email or password invalid"
                     });
@@ -118,7 +118,7 @@ function login(req, res, next) {
             });
         }
     }).catch(err=> {
-        res.status(403).json({
+        res.status(500).json({
             status : 0,
             message : "Email or password invalid"
         });
