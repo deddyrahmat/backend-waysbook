@@ -20,6 +20,8 @@
     "password": "h%7-],#kN.@~",
     "database": "u1604124_deddy_waysbooks",
     "host": "srv135.niagahoster.com",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "timezone": "+07:00",
+    "underscored": true
   }
 }

@@ -19,7 +19,7 @@ exports.uploadFile = (imageFile, bookAttachment) => {
     // filter berdasarkan parameter yang dikirim dari routes sebagai middleware
     // filter untuk memnentukan image atau pdf
     const fileFilter = function (req, file, cb) {
-        console.log('file.fieldname', file.fieldname)
+        // console.log('file.fieldname', file.fieldname)
         if (file.fieldname ===  imageFile) {
             if (!file.originalname.match(/\.(jpg|JPG|png|PNG|jpeg|JPEG)$/)) {
                 req.fileValidationError = {
@@ -89,6 +89,7 @@ exports.uploadFile = (imageFile, bookAttachment) => {
     //middleware handler
     return (req, res, next) => {
         upload(req, res, function (err) {
+            // console.log('req.files', req.files)
         //munculkan error jika validasi gagal
         if (req.fileValidationError)
             return res.status(400).json({

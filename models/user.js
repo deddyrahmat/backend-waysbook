@@ -12,10 +12,10 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       // relation 1 - many (1 user punya banyak transaksi)
-      User.hasMany(models.Transaction)
+      User.hasMany(models.Transaction, {as : "transactions"})
 
       // relation many-many(menghasilkan tabel pivot book_user)
-      User.belongsToMany(models.Book, { through: 'Bookuser',foreignKey: "user_id" });
+      User.belongsToMany(models.Book, { through: 'Bookuser', as : "bookusers",foreignKey: "user_id" });
     }
   }
   User.init({

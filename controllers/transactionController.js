@@ -73,6 +73,9 @@ async function changeStatus(req, res) {
             })
         }
 
+        console.log('status', req.body.status)
+        console.log('transacti', req.body.transaction_id)
+
         const resTransaction = await Transaction.update({
             status : req.body.status
         },{where : {
@@ -108,8 +111,13 @@ async function changeStatus(req, res) {
         }
 
         books.forEach(async (book) => {
-            const resFindBook = await Bestseller.findOne({where : {book_id : book}});
-            console.log('resFindBook', resFindBook ? true : false);
+            const resFindBook = await Bestseller.findOne({
+                where : {book_id : book},
+                attributes:{
+                    exclude : ["createdAt","updatedAt", "bestsellerId"]
+                },
+            });
+            // console.log('resFindBook', resFindBook ? true : false);
             // cek buku sudah ada atau belum
             // kalo belum add data buku,kalo ada update total
             if (!resFindBook) {

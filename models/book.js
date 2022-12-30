@@ -12,13 +12,13 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       // relation 1-1
-      Book.hasOne(models.Bestseller);
+      Book.hasOne(models.Bestseller,{as : "bestsellers",foreignKey: "id",}) ;
 
       // relation many-many
-      Book.belongsToMany(models.Transaction, { through: 'Booktransaction',foreignKey: "book_id", });
+      Book.belongsToMany(models.Transaction, { through: 'Booktransaction',as : "booktransactions",foreignKey: "book_id", });
 
       // relation many-many
-      Book.belongsToMany(models.User, { through: 'Bookuser',foreignKey: "book_id" });
+      Book.belongsToMany(models.User, { through: 'Bookuser',as : "bookusers",foreignKey: "book_id" });
     }
   }
   Book.init({
