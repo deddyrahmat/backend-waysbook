@@ -14,7 +14,7 @@ module.exports = {
         underscored: true,
         field: 'book_id',
         references: {
-          model: "Books",
+          model: "books",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -25,7 +25,7 @@ module.exports = {
         underscored: true,
         field: 'transaction_id',
         references: {
-          model: "Transactions",
+          model: "transactions",
           key: "id",
         },
         onUpdate: "CASCADE",
