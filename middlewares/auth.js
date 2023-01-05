@@ -45,9 +45,9 @@ function isAdmin(req, res, next) {
 
     User.findOne({where : {id : req.user.id}}).then(
         (result) => {
-            console.log('req user', req.user.role)
-            console.log('result', result.role)
-            console.log('result.role !== req.user.role', result.role !== req.user.role ? true : false)
+            // console.log('req user', req.user.role)
+            // console.log('result', result.role)
+            // console.log('result.role !== req.user.role', result.role !== req.user.role ? true : false)
             if (result.role !== req.user.role) {
                 return res.status(200).json({
                     status : 0,
@@ -57,7 +57,7 @@ function isAdmin(req, res, next) {
                 if (result.role !== 'admin') {
                     return res.status(200).json({
                         status : 0,
-                        message : " Admin Authorization Denied"
+                        message : "Admin Authorization Denied"
                     })
                 }
             }
