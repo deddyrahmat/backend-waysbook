@@ -17,7 +17,9 @@ module.exports = (sequelize, DataTypes) => {
       })
 
       // relation many-many(tabel pivot book_transaction)
-      Transaction.belongsToMany(models.Book, { through: 'Booktransaction', as : "booktransactions",foreignKey: "transaction_id", });
+      Transaction.belongsToMany(models.Book, { through: {
+        model : "Booktransaction",
+      }, as : "booktransactions",foreignKey: "transaction_id", });
     }
   }
   Transaction.init({

@@ -1,4 +1,4 @@
-const {Transaction, Booktransaction, Bookuser, Bestseller} = require('../models');
+const {Transaction, Booktransaction, Bookuser, Bestseller, Book, User} = require('../models');
 const Validator = require('fastest-validator');
 const { schemaTransactionPayment, schemaStatusPayment } = require('../utilities/validation_schema');
 
@@ -150,4 +150,66 @@ async function changeStatus(req, res) {
 
 }
 
-module.exports = {create, changeStatus}
+function list(req, res) {
+    // default halaman saat ini adalah 1
+    const currentPage = req.query.page || 1;
+
+    // default hanya 5 data yang di tampilkan 
+    const perPage = req.query.perPage || 5;
+
+    // halaman saat ini - 1, halaman 1 - 1 = 0, lalu 0 * dengan berapapun hasilnya tetap 0. maka offset di mysql di mulai dari 0 di halaman pertama
+    // jika halaman saat ini adalah ke 2, maka 2 -1 = 1, lalu 1 * 5(perPage) = 5, maka offseet mysql dimulai dari 6 karna 1-5 akan di skip dan loncat ke baris ke 6
+    let dataOffset = (parseInt(currentPage)-1) * parseInt(perPage);
+
+    Transaction.findAndCountAll({
+        attributes: { 
+            exclude: ['cloudinary_id_evidence','updatedAt','UserId'] 
+        },
+        include : [
+            {
+                model : User,
+                as : "user",
+                attributes:['fullname']
+            },
+            {
+                model : Book,
+                as : "booktransactions",//harus sama dengan di database
+                attributes : ['title'],
+                through: {
+                    attributes: [],
+                },
+            }
+        ],
+        order : [
+            ['created_at','DESC']
+        ],
+        offset: dataOffset,
+        limit: perPage
+    }).then((result) => {
+        if (result.rows.length === 0 ) {
+            res.status(200).json({
+                status : 1,
+                message : "Data Books Not Found",
+                data : result.rows,
+                total_data : result.count,
+                per_page : perPage,
+                current_page : currentPage
+            })
+        }
+        res.status(200).json({
+            status : 1,
+            message : "Data Books Avaiable",
+            data : result.rows,
+            total_data : result.count,
+            per_page : perPage,
+            current_page : currentPage
+        })
+    }).catch((err) => {
+        res.status(500).json({
+            status : 0,
+            message : err,
+        })
+    });
+}
+
+module.exports = {list, create, changeStatus}
