@@ -7,7 +7,7 @@ const v = new Validator();
 function create(req, res) {
     // console.log('req.files', req.body)
     const { books } = req.body;
-    // const newBooks = JSON.parse(books);
+    const newBooks = JSON.parse(books);
 
     const data = {
         total : parseInt(req.body.total),
@@ -27,7 +27,7 @@ function create(req, res) {
             cloudinary_id_evidence : req.files.evidence[0].filename,
             evidence : req.files.evidence[0].path,
         }).then((result) => {
-            const dataBooks = books.map(book =>  {
+            const dataBooks = newBooks.map(book =>  {
                 return {
                     book_id : parseInt(book),
                     transaction_id : parseInt(result.dataValues.id),
@@ -46,6 +46,11 @@ function create(req, res) {
                         message : err
                     })
                 });
+            }else {
+                return res.status(200).json({
+                    status : 0,
+                    message : "Data books for transaction not found"
+                })
             }
         }).catch((err) => {
             res.status(500).json({
