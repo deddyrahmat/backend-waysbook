@@ -49,10 +49,10 @@ function create(req, res) {
 
 function getBooks(req, res) {
     // default halaman saat ini adalah 1
-    const currentPage = req.query.page || 1;
+    const currentPage = parseInt(req.query.page) || 1;
 
     // default hanya 5 data yang di tampilkan 
-    const perPage = req.query.perPage || 5;
+    const perPage = parseInt(req.query.perPage) || 5;
 
     // halaman saat ini - 1, halaman 1 - 1 = 0, lalu 0 * dengan berapapun hasilnya tetap 0. maka offset di mysql di mulai dari 0 di halaman pertama
     // jika halaman saat ini adalah ke 2, maka 2 -1 = 1, lalu 1 * 5(perPage) = 5, maka offseet mysql dimulai dari 6 karna 1-5 akan di skip dan loncat ke baris ke 6
