@@ -1,4 +1,4 @@
-const {Book, Bestseller} = require('../models');
+const {Book, Bestseller, Bookuser, User} = require('../models');
 const Validator = require('fastest-validator');
 const slugify = require('slugify');
 const { schemaCreateBook } = require('../utilities/validation_schema');
@@ -163,4 +163,47 @@ function bestSeller(req, res) {
     })
 }
 
-module.exports = {create, getBooks, getBookById, bestSeller}
+function purchased(req, res) {
+    // console.log('req.user', req.user.id)
+    User.findAndCountAll({
+        where : {
+            id : req.user.id
+        },  
+        attributes : ['createdAt'],
+        include : [
+            {
+                model : Book,
+                attributes:{
+                    exclude:["createdAt","updatedAt","cloudinary_id_book_attachment","cloudinary_id_thumbnail"]
+                },
+                through: {
+                    attributes: [],
+                },
+            }
+        ],
+        order: [
+            ['createdAt', 'DESC']
+        ],
+        limit : 5,
+    }).then((result) => {
+        if (result.length === 0) {
+            return res.status(200).json({
+                status : 1,
+                message : "Data Empty",
+                data : null
+            })
+        }
+        return res.status(200).json({
+            status : 1,
+            message : "Load Data Success",
+            data : result
+        })
+    }).catch(err => {
+        return res.status(500).json({
+            status : 0,
+            message : err.name
+        })
+    })
+}
+
+module.exports = {create, getBooks, getBookById, bestSeller, purchased}

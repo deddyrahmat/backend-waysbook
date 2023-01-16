@@ -94,7 +94,7 @@ async function changeStatus(req, res) {
             })
         }
 
-        if (req.body.status !== 'approve') {
+        if (req.body.status !== 'approved') {
             return res.status(200).json({
                 status : 1,
                 message : "Status Updated"
@@ -174,7 +174,7 @@ function list(req, res) {
             {
                 model : Book,
                 as : "booktransactions",//harus sama dengan di database
-                attributes : ['title'],
+                attributes : ['id','title'],
                 through: {
                     attributes: [],
                 },

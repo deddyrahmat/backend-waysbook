@@ -105,6 +105,9 @@ function login(req, res, next) {
                                  id : result.id,
                                  fullname : result.fullname,
                                  avatar : result.avatar,
+                                 gender : result.gender,
+                                 phone : result.phone,
+                                 location : result.location,
                                  email : result.email,
                                  role : result.role
                              }
