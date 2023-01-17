@@ -1,230 +1,250 @@
-const {User} = require('../models');
-const Validator = require('fastest-validator');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { token } = require('morgan');
-const { signAccessToken, signRefreshToken } = require('../utilities/jwt');
-const { schemaRegister } = require('../utilities/validation_schema');
+const { User } = require("../models");
+const Validator = require("fastest-validator");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { token } = require("morgan");
+const { signAccessToken, signRefreshToken } = require("../utilities/jwt");
+const { schemaRegister } = require("../utilities/validation_schema");
 
-require('dotenv').config;
+require("dotenv").config;
 const v = new Validator();
 
 function register(req, res, next) {
-    bcrypt.genSalt(10, function(err, salt) {
-        bcrypt.hash(req.body.password, salt, function(err, hash) {
-            User.findOne({where : {email : req.body.email}}).then((resultUser) => {
-                // console.log('resultUser', resultUser)
+    bcrypt.genSalt(10, function (err, salt) {
+        bcrypt.hash(req.body.password, salt, function (err, hash) {
+            User.findOne({ where: { email: req.body.email } })
+                .then((resultUser) => {
+                    // console.log('resultUser', resultUser)
 
-                if (resultUser) {
-                    return res.status(403).json({
-                        status : 0,
-                        message : "Email already exist"
-                    });
-                }
+                    if (resultUser) {
+                        return res.status(403).json({
+                            status: 0,
+                            message: "Email already exist",
+                        });
+                    }
 
-                const data = {
-                    fullname : req.body.fullname,
-                    password : hash,
-                    email : req.body.email,
-                    role : "user"
-                }
-    
-                const check = v.validate(data, schemaRegister);
-                // console.log('check', check)
-                if (check !== true) { 
-                    res.status(200).json({
-                        status : 0,
-                        message : check[0].message
-                    })
-                }
-                else {
-                    User.create(data).then(() => {
+                    const data = {
+                        fullname: req.body.fullname,
+                        password: hash,
+                        email: req.body.email,
+                        role: "user",
+                    };
+
+                    const check = v.validate(data, schemaRegister);
+                    // console.log('check', check)
+                    if (check !== true) {
                         res.status(200).json({
-                            status : 1,
-                            message : "Register Success"
-                        })
-                    }).catch(err => {
-                        res.status(500).json({
-                            status : 0,
-                            message : err
-                        })
-                    });
-                }
-            }).catch(err => {
-                res.status(500).json({
-                    status : 0,
-                    message : "Server Error"
+                            status: 0,
+                            message: check[0].message,
+                        });
+                    } else {
+                        User.create(data)
+                            .then(() => {
+                                res.status(200).json({
+                                    status: 1,
+                                    message: "Register Success",
+                                });
+                            })
+                            .catch((err) => {
+                                res.status(500).json({
+                                    status: 0,
+                                    message: err,
+                                });
+                            });
+                    }
                 })
-            })
-            
+                .catch((err) => {
+                    res.status(500).json({
+                        status: 0,
+                        message: "Server Error",
+                    });
+                });
         });
     });
 }
 
 function login(req, res, next) {
     User.findOne({
-        where : {email : req.body.email},
-        attributes: { exclude: ['createdAt','updatedAt'] }
-    }).then(result => {
-        // console.log('result', result.password);
-        if (!result) {
-            res.status(200).json({
-                status : 0,
-                message : "Email or password invalid"
-            });
-        }else {
-            bcrypt.compare(req.body.password, result.password, async function(err, resultPass) {
-                if (resultPass) {
+        where: { email: req.body.email },
+        attributes: { exclude: ["createdAt", "updatedAt"] },
+    })
+        .then((result) => {
+            // console.log('result', result.password);
+            if (!result) {
+                res.status(200).json({
+                    status: 0,
+                    message: "Email or password invalid",
+                });
+            } else {
+                bcrypt.compare(
+                    req.body.password,
+                    result.password,
+                    async function (err, resultPass) {
+                        if (resultPass) {
+                            const signLogin = await signAccessToken(
+                                result.dataValues
+                            );
 
-                    const signLogin = await signAccessToken(result.dataValues);
+                            const signRefresh = await signRefreshToken(
+                                result.dataValues
+                            );
 
-                    const signRefresh = await signRefreshToken(result.dataValues);
+                            // jika funcction tanpa err, result token jadi null
+                            // console.log('err', err);
+                            if (!signLogin) {
+                                res.status(200).json({
+                                    status: 0,
+                                    message: signLogin,
+                                });
+                            }
 
-                     // jika funcction tanpa err, result token jadi null
-                        // console.log('err', err);
-                        if (!signLogin) {
+                            if (!signRefresh) {
+                                res.status(200).json({
+                                    status: 0,
+                                    message: signRefresh,
+                                });
+                            }
+
                             res.status(200).json({
-                                status : 0,
-                                message : signLogin
-                            })
-                        }
-
-                        if (!signRefresh) {
+                                status: 1,
+                                message: "Login Success",
+                                token: signLogin,
+                                refresh_token: signRefresh,
+                                data: {
+                                    id: result.id,
+                                    fullname: result.fullname,
+                                    avatar: result.avatar,
+                                    gender: result.gender,
+                                    phone: result.phone,
+                                    location: result.location,
+                                    email: result.email,
+                                    role: result.role,
+                                },
+                            });
+                        } else {
                             res.status(200).json({
-                                status : 0,
-                                message : signRefresh
-                            })
+                                status: 0,
+                                message: "Email or password invalid",
+                            });
                         }
-
-                         res.status(200).json({
-                             status : 1,
-                             message : "Login Success",
-                             token : signLogin,
-                             refresh_token : signRefresh,
-                             data : {
-                                 id : result.id,
-                                 fullname : result.fullname,
-                                 avatar : result.avatar,
-                                 gender : result.gender,
-                                 phone : result.phone,
-                                 location : result.location,
-                                 email : result.email,
-                                 role : result.role
-                             }
-                         });
-                }else{
-                    res.status(200).json({
-                        status : 0,
-                        message : "Email or password invalid"
-                    });
-                }
+                    }
+                );
+            }
+        })
+        .catch((err) => {
+            res.status(500).json({
+                status: 0,
+                message: "Email or password invalid",
             });
-        }
-    }).catch(err=> {
-        res.status(500).json({
-            status : 0,
-            message : "Email or password invalid"
         });
-    });
 }
 
 async function refreshTokenJwt(req, res, next) {
-    const authHeader = req.headers;
-    if (authHeader) {
+    try {
         // console.log('authHeader', authHeader)
         // jika ada headers authorization yang dikirimkan
-        const token = authHeader.authorization.split(' ')[1];
-        const resultRefresh = jwt.verify(token, process.env.REFRESH_JWT_SECRET);
+        // const token = authHeader.authorization.split(' ')[1];
+        const resultRefresh = jwt.verify(
+            req.body.token,
+            process.env.REFRESH_JWT_SECRET
+        );
         if (!resultRefresh) {
             return res.status(401).json({
-                status : 0,
-                message : resultRefresh
-            })
+                status: 0,
+                message: resultRefresh,
+            });
         }
 
-        const signLogin = await signAccessToken({ 
-            id : resultRefresh.id,
-            fullname : resultRefresh.fullname,
-            avatar : resultRefresh.avatar,
-            email : resultRefresh.email,
-            role : resultRefresh.role
-         });
+        const signLogin = await signAccessToken({
+            id: resultRefresh.id,
+            fullname: resultRefresh.fullname,
+            avatar: resultRefresh.avatar,
+            email: resultRefresh.email,
+            role: resultRefresh.role,
+        });
 
-        const signRefresh = await signRefreshToken({ 
-            id : resultRefresh.id,
-            fullname : resultRefresh.fullname,
-            avatar : resultRefresh.avatar,
-            email : resultRefresh.email,
-            role : resultRefresh.role
-         });
+        const signRefresh = await signRefreshToken({
+            id: resultRefresh.id,
+            fullname: resultRefresh.fullname,
+            avatar: resultRefresh.avatar,
+            email: resultRefresh.email,
+            role: resultRefresh.role,
+        });
 
-         // jika funcction tanpa err, result token jadi null
-            // console.log('err', err);
-            if (!signLogin) {
-                res.status(401).json({
-                    status : 0,
-                    message : signLogin
-                })
-            }
+        // jika funcction tanpa err, result token jadi null
+        // console.log('err', err);
+        if (!signLogin) {
+            res.status(200).json({
+                status: 0,
+                message: signLogin,
+            });
+        }
 
-            if (!signRefresh) {
-                res.status(401).json({
-                    status : 0,
-                    message : signRefresh
-                })
-            }
+        if (!signRefresh) {
+            res.status(200).json({
+                status: 0,
+                message: signRefresh,
+            });
+        }
 
-             res.status(200).json({
-                 status : 1,
-                 message : "Login Success",
-                 token : signLogin,
-                 refresh_token : signRefresh,
-                 data : {
-                     id : resultRefresh.id,
-                     fullname : resultRefresh.fullname,
-                     avatar : resultRefresh.avatar,
-                     email : resultRefresh.email,
-                     role : resultRefresh.role
-                 }
-             });
+        res.status(200).json({
+            status: 1,
+            message: "Login Success",
+            token: signLogin,
+            refresh_token: signRefresh,
+            data: {
+                id: resultRefresh.id,
+                fullname: resultRefresh.fullname,
+                avatar: resultRefresh.avatar,
+                email: resultRefresh.email,
+                role: resultRefresh.role,
+            },
+        });
+    } catch (error) {
+        res.status(403).json({
+            status: 0,
+            message: error.message,
+        });
     }
-
 }
 
 async function update(req, res) {
-    const {body} = req;
+    const { body } = req;
     try {
-        const response = await User.update(body, {where : {id : req.user.id}});
+        const response = await User.update(body, {
+            where: { id: req.user.id },
+        });
         if (response.status === 0) {
             return res.status(200).json({
-                status : 0,
-                message : "update failed"
-            })
+                status: 0,
+                message: "update failed",
+            });
         }
 
         const responseUser = await User.findOne({
-            where : {id : req.user.id},
-            attributes: { exclude: ['password','role','createdAt','updatedAt'] }
+            where: { id: req.user.id },
+            attributes: {
+                exclude: ["password", "role", "createdAt", "updatedAt"],
+            },
         });
 
         if (responseUser.status === 0) {
             return res.status(200).json({
-                status : 0,
-                message : "user not found after update"
-            })
+                status: 0,
+                message: "user not found after update",
+            });
         }
 
         return res.status(200).json({
-            status : 1,
-            message : "Successfully Update Profile",
-            data : responseUser
-        })
-
+            status: 1,
+            message: "Successfully Update Profile",
+            data: responseUser,
+        });
     } catch (error) {
         return res.status(500).json({
-            status : 0,
-            message : error
-        })
+            status: 0,
+            message: error,
+        });
     }
     // User.update(body, {where : {id : req.user.id}}).then(() => {
     //     return res.status(200).json({
@@ -240,21 +260,26 @@ async function update(req, res) {
 }
 
 function updateImage(req, res) {
-    const {files} = req;
+    const { files } = req;
     // book_attachment: req.files.bookAttachment[0].path,
-    User.update({
-        avatar : files.avatar[0].path
-    }, {where : {id : req.user.id}}).then(() => {
-        return res.status(200).json({
-            status : 1,
-            message : "Successfully Update Profile"
+    User.update(
+        {
+            avatar: files.avatar[0].path,
+        },
+        { where: { id: req.user.id } }
+    )
+        .then(() => {
+            return res.status(200).json({
+                status: 1,
+                message: "Successfully Update Profile",
+            });
         })
-    }).catch(err => {
-        return res.status(500).json({
-            status : 0,
-            message : err
-        })
-    })
+        .catch((err) => {
+            return res.status(500).json({
+                status: 0,
+                message: err,
+            });
+        });
 }
 
-module.exports = {register, login, refreshTokenJwt, update, updateImage}
+module.exports = { register, login, refreshTokenJwt, update, updateImage };

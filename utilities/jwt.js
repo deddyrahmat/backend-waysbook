@@ -5,7 +5,7 @@ const createError = require('http-errors')
 function signAccessToken(data) {
     return new Promise((resolve, reject) => {
         const option = {
-            expiresIn: '1h'
+            expiresIn: '5h'
         }
     
         jwt.sign(data, process.env.JWT_SECRET, option, (err, token) => {
@@ -25,7 +25,7 @@ function signAccessToken(data) {
 function signRefreshToken(data) {
     return new Promise((resolve, reject) => {
         const option = {
-            expiresIn: '24h'
+            expiresIn: '3d'
         }
     
         jwt.sign(data, process.env.REFRESH_JWT_SECRET, option, (err, token) => {
