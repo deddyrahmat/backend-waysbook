@@ -191,19 +191,52 @@ async function refreshTokenJwt(req, res, next) {
 
 }
 
-function update(req, res) {
+async function update(req, res) {
     const {body} = req;
-    User.update(body, {where : {id : req.user.id}}).then(() => {
+    try {
+        const response = await User.update(body, {where : {id : req.user.id}});
+        if (response.status === 0) {
+            return res.status(200).json({
+                status : 0,
+                message : "update failed"
+            })
+        }
+
+        const responseUser = await User.findOne({
+            where : {id : req.user.id},
+            attributes: { exclude: ['password','role','createdAt','updatedAt'] }
+        });
+
+        if (responseUser.status === 0) {
+            return res.status(200).json({
+                status : 0,
+                message : "user not found after update"
+            })
+        }
+
         return res.status(200).json({
             status : 1,
-            message : "Successfully Update Profile"
+            message : "Successfully Update Profile",
+            data : responseUser
         })
-    }).catch(err => {
+
+    } catch (error) {
         return res.status(500).json({
             status : 0,
-            message : err
+            message : error
         })
-    })
+    }
+    // User.update(body, {where : {id : req.user.id}}).then(() => {
+    //     return res.status(200).json({
+    //         status : 1,
+    //         message : "Successfully Update Profile"
+    //     })
+    // }).catch(err => {
+    //     return res.status(500).json({
+    //         status : 0,
+    //         message : err
+    //     })
+    // })
 }
 
 function updateImage(req, res) {
