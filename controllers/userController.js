@@ -206,4 +206,22 @@ function update(req, res) {
     })
 }
 
-module.exports = {register, login, refreshTokenJwt, update}
+function updateImage(req, res) {
+    const {files} = req;
+    // book_attachment: req.files.bookAttachment[0].path,
+    User.update({
+        avatar : files.avatar[0].path
+    }, {where : {id : req.user.id}}).then(() => {
+        return res.status(200).json({
+            status : 1,
+            message : "Successfully Update Profile"
+        })
+    }).catch(err => {
+        return res.status(500).json({
+            status : 0,
+            message : err
+        })
+    })
+}
+
+module.exports = {register, login, refreshTokenJwt, update, updateImage}
