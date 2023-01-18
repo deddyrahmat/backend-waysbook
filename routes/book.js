@@ -6,6 +6,7 @@ const {uploadFile} = require('../middlewares/uploadFile');
 const middlewareAuth = require('../middlewares/auth')
 
 router.get('/', bookController.getBooks);
+router.get('/search', bookController.searchBooks);
 router.get('/best-seller', bookController.bestSeller);
 router.get('/purchased', middlewareAuth.auth, bookController.purchased);
 router.get('/:slug', middlewareAuth.auth,bookController.getBookById);

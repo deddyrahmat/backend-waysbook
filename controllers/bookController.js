@@ -1,7 +1,7 @@
 const { Book, Bestseller, Bookuser, User } = require("../models");
 const Validator = require("fastest-validator");
 const slugify = require("slugify");
-const { QueryTypes } = require("sequelize");
+const { QueryTypes, Op } = require("sequelize");
 const { schemaCreateBook } = require("../utilities/validation_schema");
 
 const v = new Validator();
@@ -61,6 +61,61 @@ function getBooks(req, res) {
     let dataOffset = (parseInt(currentPage) - 1) * parseInt(perPage);
 
     Book.findAndCountAll({
+        attributes: {
+            exclude: [
+                "cloudinary_id_bookAttachment",
+                "cloudinary_id_thumbnail",
+                "createdAt",
+                "updatedAt",
+            ],
+        },
+        order: [["title", "DESC"]],
+        offset: dataOffset,
+        limit: perPage,
+    })
+        .then((result) => {
+            if (result.rows.length === 0) {
+                res.status(200).json({
+                    status: 1,
+                    message: "Data Books Not Found",
+                    data: result.rows,
+                    total_data: result.count,
+                    per_page: perPage,
+                    current_page: currentPage,
+                });
+            }
+            res.status(200).json({
+                status: 1,
+                message: "Data Books Avaiable",
+                data: result.rows,
+                total_data: result.count,
+                per_page: perPage,
+                current_page: currentPage,
+            });
+        })
+        .catch((err) => {
+            res.status(500).json({
+                status: 0,
+                message: err,
+            });
+        });
+}
+
+function searchBooks(req, res) {
+    // default halaman saat ini adalah 1
+    const currentPage = parseInt(req.query.page) || 1;
+
+    // default hanya 5 data yang di tampilkan
+    const perPage = parseInt(req.query.perPage) || 5;
+
+    // halaman saat ini - 1, halaman 1 - 1 = 0, lalu 0 * dengan berapapun hasilnya tetap 0. maka offset di mysql di mulai dari 0 di halaman pertama
+    // jika halaman saat ini adalah ke 2, maka 2 -1 = 1, lalu 1 * 5(perPage) = 5, maka offseet mysql dimulai dari 6 karna 1-5 akan di skip dan loncat ke baris ke 6
+    let dataOffset = (parseInt(currentPage) - 1) * parseInt(perPage);
+
+    Book.findAndCountAll({
+        where : {
+            title: {[Op.like]: `%${req.query.keyword}%`}, 
+        },
         attributes: {
             exclude: [
                 "cloudinary_id_bookAttachment",
@@ -222,4 +277,4 @@ function purchased(req, res) {
         });
 }
 
-module.exports = { create, getBooks, getBookById, bestSeller, purchased };
+module.exports = { create, getBooks, searchBooks, getBookById, bestSeller, purchased };
