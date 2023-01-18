@@ -17,7 +17,7 @@ function register(req, res, next) {
                     // console.log('resultUser', resultUser)
 
                     if (resultUser) {
-                        return res.status(403).json({
+                        return res.status(200).json({
                             status: 0,
                             message: "Email already exist",
                         });
