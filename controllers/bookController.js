@@ -17,7 +17,7 @@ function create(req, res) {
         pages: req.body.pages,
         isbn: req.body.isbn,
         short_desc: req.body.short_desc,
-        detail: req.body.short_desc,
+        detail: req.body.detail,
     };
 
     const check = v.validate(data, schemaCreateBook);
