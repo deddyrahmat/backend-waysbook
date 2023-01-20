@@ -236,7 +236,7 @@ function bestSeller(req, res) {
         });
 }
 
-function purchased(req, res) {
+async function purchased(req, res) {
     // default halaman saat ini adalah 1
     const currentPage = parseInt(req.query.page) || 1;
 
@@ -247,6 +247,8 @@ function purchased(req, res) {
     // jika halaman saat ini adalah ke 2, maka 2 -1 = 1, lalu 1 * 5(perPage) = 5, maka offseet mysql dimulai dari 6 karna 1-5 akan di skip dan loncat ke baris ke 6
     let dataOffset = (parseInt(currentPage) - 1) * parseInt(perPage);
 
+    let total = await Bookuser.count({where : {user_id : req.user.id}});
+    
     Book.sequelize
         .query(
             `SELECT bookusers.id, books.id AS book_id, slug,title,thumbnail,author,price,publication,pages,isbn,short_desc,detail,book_attachment,cloudinary_id_book_attachment FROM books INNER JOIN bookusers ON books.id = bookusers.book_id WHERE bookusers.user_id = ? ORDER BY bookusers.id DESC limit ? offset ?`,
@@ -267,6 +269,7 @@ function purchased(req, res) {
                 status: 1,
                 message: "Load Data Success",
                 data: result,
+                total_data : total
             });
         })
         .catch((err) => {
@@ -277,4 +280,30 @@ function purchased(req, res) {
         });
 }
 
-module.exports = { create, getBooks, searchBooks, getBookById, bestSeller, purchased };
+function bookUser(req, res) {
+    Bookuser.findAll({
+        where : {
+            user_id : req.user.id
+        }, attributes : ['book_id']
+    }).then(result => {
+        if (result.length === 0) {
+            return res.status(200).json({
+                status: 1,
+                message: "Book Not Found",
+                data: null,
+            });
+        }
+        return res.status(200).json({
+            status: 1,
+            message: "Load Data Success",
+            data: result.map(item => item.book_id),
+        });
+    }).catch((err) => {
+        return res.status(500).json({
+            status: 0,
+            message: err,
+        });
+    });
+}
+
+module.exports = { create, getBooks, searchBooks, getBookById, bestSeller, purchased, bookUser };
