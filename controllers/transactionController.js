@@ -212,4 +212,136 @@ function list(req, res) {
     });
 }
 
-module.exports = {list, create, changeStatus}
+function listPendingByUser(req, res) {
+    // default halaman saat ini adalah 1
+    const currentPage = parseInt(req.query.page) || 1;
+
+    // default hanya 5 data yang di tampilkan 
+    const perPage = parseInt(req.query.perPage) || 5;
+
+    // halaman saat ini - 1, halaman 1 - 1 = 0, lalu 0 * dengan berapapun hasilnya tetap 0. maka offset di mysql di mulai dari 0 di halaman pertama
+    // jika halaman saat ini adalah ke 2, maka 2 -1 = 1, lalu 1 * 5(perPage) = 5, maka offseet mysql dimulai dari 6 karna 1-5 akan di skip dan loncat ke baris ke 6
+    let dataOffset = (parseInt(currentPage)-1) * parseInt(perPage);
+
+    Transaction.findAndCountAll({
+        where : {
+            user_id : req.user.id,
+            status : "pending"
+        },  
+        attributes: { 
+            exclude: ['cloudinary_id_evidence','updatedAt','UserId'] 
+        },
+        include : [
+            {
+                model : User,
+                as : "user",
+                attributes:['fullname']
+            },
+            {
+                model : Book,
+                as : "booktransactions",//harus sama dengan di database
+                attributes : ['id','title'],
+                through: {
+                    attributes: [],
+                },
+            }
+        ],
+        order : [
+            ['created_at','DESC']
+        ],
+        offset: dataOffset,
+        limit: perPage
+    }).then((result) => {
+        if (result.rows.length === 0 ) {
+            res.status(200).json({
+                status : 1,
+                message : "Data Books Not Found",
+                data : result.rows,
+                total_data : result.count,
+                per_page : perPage,
+                current_page : currentPage
+            })
+        }
+        res.status(200).json({
+            status : 1,
+            message : "Data Books Avaiable",
+            data : result.rows,
+            total_data : result.count,
+            per_page : perPage,
+            current_page : currentPage
+        })
+    }).catch((err) => {
+        res.status(500).json({
+            status : 0,
+            message : err,
+        })
+    });
+}
+
+function listCancelByUser(req, res) {
+    // default halaman saat ini adalah 1
+    const currentPage = parseInt(req.query.page) || 1;
+
+    // default hanya 5 data yang di tampilkan 
+    const perPage = parseInt(req.query.perPage) || 5;
+
+    // halaman saat ini - 1, halaman 1 - 1 = 0, lalu 0 * dengan berapapun hasilnya tetap 0. maka offset di mysql di mulai dari 0 di halaman pertama
+    // jika halaman saat ini adalah ke 2, maka 2 -1 = 1, lalu 1 * 5(perPage) = 5, maka offseet mysql dimulai dari 6 karna 1-5 akan di skip dan loncat ke baris ke 6
+    let dataOffset = (parseInt(currentPage)-1) * parseInt(perPage);
+
+    Transaction.findAndCountAll({
+        where : {
+            user_id : req.user.id,
+            status : "cancel"
+        },  
+        attributes: { 
+            exclude: ['cloudinary_id_evidence','updatedAt','UserId'] 
+        },
+        include : [
+            {
+                model : User,
+                as : "user",
+                attributes:['fullname']
+            },
+            {
+                model : Book,
+                as : "booktransactions",//harus sama dengan di database
+                attributes : ['id','title'],
+                through: {
+                    attributes: [],
+                },
+            }
+        ],
+        order : [
+            ['created_at','DESC']
+        ],
+        offset: dataOffset,
+        limit: perPage
+    }).then((result) => {
+        if (result.rows.length === 0 ) {
+            res.status(200).json({
+                status : 1,
+                message : "Data Books Not Found",
+                data : result.rows,
+                total_data : result.count,
+                per_page : perPage,
+                current_page : currentPage
+            })
+        }
+        res.status(200).json({
+            status : 1,
+            message : "Data Books Avaiable",
+            data : result.rows,
+            total_data : result.count,
+            per_page : perPage,
+            current_page : currentPage
+        })
+    }).catch((err) => {
+        res.status(500).json({
+            status : 0,
+            message : err,
+        })
+    });
+}
+
+module.exports = {list, listPendingByUser, listCancelByUser, create, changeStatus}
