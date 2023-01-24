@@ -290,7 +290,7 @@ function bookUser(req, res) {
             return res.status(200).json({
                 status: 1,
                 message: "Book Not Found",
-                data: null,
+                data: [],
             });
         }
         return res.status(200).json({
